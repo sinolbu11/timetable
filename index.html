@@ -107,8 +107,7 @@ table.g td.drop{background:var(--off-bg);color:var(--faint);text-decoration:line
 .seg .dot{display:inline-block;min-width:18px;padding:0 5px;border-radius:9px;background:var(--accent);color:#fff;font-size:11px;line-height:18px}
 table.sg{border-collapse:separate;border-spacing:2px;width:100%;table-layout:fixed}
 table.sg th{font-size:11.5px;color:var(--muted);padding:2px 0;border-radius:6px}table.sg th:first-child{width:34px}table.sg th.now{background:var(--info-line);color:#fff}
-table.sg td{height:40px;border:1px solid var(--line-soft);border-radius:6px;text-align:center;font-size:10.5px;line-height:1.15;padding:1px;word-break:break-all;overflow:hidden;background:var(--surface)}
-table.sg td.tn{font-size:11.5px;font-weight:600}
+table.sg td{height:40px;border:1px solid var(--line-soft);border-radius:6px;text-align:center;font-size:11.5px;font-weight:600;color:var(--fg);line-height:1.15;padding:1px;word-break:break-all;overflow:hidden;background:var(--surface)}
 .seg.mini{width:150px;margin:0 0 8px auto}.seg.mini button{padding:5px 0;font-size:13px}
 table.g td .ws{display:block;font-weight:600}table.g td .wn{display:block;font-size:10px;color:var(--muted);font-weight:400}table.g td.add .wn{color:var(--chg-fg)}
 table.sg td.cn{border:0;background:none;font-weight:800;font-size:15px;color:var(--fg);cursor:pointer}table.sg td.cn small{font-size:9px;font-weight:400;color:var(--muted)}
@@ -300,7 +299,7 @@ function render() {
 }
 function setView(v) { S.view = v; ls('tt.view', v); render(); }
 function sgDays() {
-  if (!S.sgShow) S.sgShow = ls('tt.sgshow') || 's'; return (S.sg && S.sg.days || []).map(function (x) { return x.date; }); }
+  if (!S.sgShow) S.sgShow = ls('tt.sgshow2') || 't'; return (S.sg && S.sg.days || []).map(function (x) { return x.date; }); }
 function schoolHtml(d) {
   var h = adminHtml(d.admin), g = S.sg;
   if (!g) return h + '<div class="card"><p class="empty">' + (S.busy ? '학교 전체 시간표를 받아 오는 중이에요…' : '학교 전체 시간표가 아직 없어요. 오른쪽 위 새로고침을 눌러 주세요.') + '</p></div>';
@@ -322,7 +321,7 @@ function schoolHtml(d) {
   }).join('') + '</div>';
   var cur = null, m = nowMin(); if (isT) (d.bells || []).forEach(function (b) { if (m >= hm(b.s) && m < hm(b.e)) cur = b.p; });
   var showT = S.sgShow === 't';
-  h += '<div class="seg small mini"><button class="' + (!showT ? 'on' : '') + '" onclick="setShow(\'s\')">과목</button><button class="' + (showT ? 'on' : '') + '" onclick="setShow(\'t\')">선생님</button></div>';
+  h += '<div class="seg small mini"><button class="' + (showT ? 'on' : '') + '" onclick="setShow(\'t\')">선생님</button><button class="' + (!showT ? 'on' : '') + '" onclick="setShow(\'s\')">과목</button></div>';
   h += '<table class="sg"><tr><th></th>';
   for (var p = 1; p <= g.periods; p++) h += '<th' + (cur === p ? ' class="now"' : '') + '>' + p + '</th>';
   h += '</tr>';
@@ -363,7 +362,7 @@ function classWeekHtml(c, d) {
   }
   return h + '</table></div>';
 }
-function setShow(v) { S.sgShow = v; ls('tt.sgshow', v); render(); }
+function setShow(v) { S.sgShow = v; ls('tt.sgshow2', v); render(); }
 function smove(n) { var days = sgDays(), i = days.indexOf(S.sday) + n; if (i >= 0 && i < days.length) { S.sday = days[i]; S.cell = null; render(); } }
 function setGrade(x) { S.grade = x; ls('tt.grade', x); S.cell = null; S.openCls = (S.openCls && S.openCls.split('-')[0] === x) ? S.openCls : null; render(); }
 function cellInfo(c, p) { S.cell = (S.cell && S.cell.c === c && S.cell.p === p) ? null : { c: c, p: p }; render(); }
