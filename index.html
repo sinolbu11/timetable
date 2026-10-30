@@ -108,6 +108,9 @@ table.g td.drop{background:var(--off-bg);color:var(--faint);text-decoration:line
 table.sg{border-collapse:separate;border-spacing:2px;width:100%;table-layout:fixed}
 table.sg th{font-size:11.5px;color:var(--muted);padding:2px 0;border-radius:6px}table.sg th:first-child{width:34px}table.sg th.now{background:var(--info-line);color:#fff}
 table.sg td{height:40px;border:1px solid var(--line-soft);border-radius:6px;text-align:center;font-size:10.5px;line-height:1.15;padding:1px;word-break:break-all;overflow:hidden;background:var(--surface)}
+table.sg td.tn{font-size:11.5px;font-weight:600}
+.seg.mini{width:150px;margin:0 0 8px auto}.seg.mini button{padding:5px 0;font-size:13px}
+table.g td .ws{display:block;font-weight:600}table.g td .wn{display:block;font-size:10px;color:var(--muted);font-weight:400}table.g td.add .wn{color:var(--chg-fg)}
 table.sg td.cn{border:0;background:none;font-weight:800;font-size:15px;color:var(--fg);cursor:pointer}table.sg td.cn small{font-size:9px;font-weight:400;color:var(--muted)}
 table.sg td.cn.on{color:var(--accent)}
 table.sg td.e{border-style:dashed;background:none}table.sg td.m{color:var(--faint);border-style:dashed;background:none}
@@ -296,7 +299,8 @@ function render() {
   swipe();
 }
 function setView(v) { S.view = v; ls('tt.view', v); render(); }
-function sgDays() { return (S.sg && S.sg.days || []).map(function (x) { return x.date; }); }
+function sgDays() {
+  if (!S.sgShow) S.sgShow = ls('tt.sgshow') || 's'; return (S.sg && S.sg.days || []).map(function (x) { return x.date; }); }
 function schoolHtml(d) {
   var h = adminHtml(d.admin), g = S.sg;
   if (!g) return h + '<div class="card"><p class="empty">' + (S.busy ? '학교 전체 시간표를 받아 오는 중이에요…' : '학교 전체 시간표가 아직 없어요. 오른쪽 위 새로고침을 눌러 주세요.') + '</p></div>';
@@ -317,6 +321,8 @@ function schoolHtml(d) {
     return '<button class="' + (x === S.grade ? 'on' : '') + '" onclick="setGrade(\'' + x + '\')">' + x + '학년' + (n ? ' <b class="dot">' + n + '</b>' : '') + '</button>';
   }).join('') + '</div>';
   var cur = null, m = nowMin(); if (isT) (d.bells || []).forEach(function (b) { if (m >= hm(b.s) && m < hm(b.e)) cur = b.p; });
+  var showT = S.sgShow === 't';
+  h += '<div class="seg small mini"><button class="' + (!showT ? 'on' : '') + '" onclick="setShow(\'s\')">과목</button><button class="' + (showT ? 'on' : '') + '" onclick="setShow(\'t\')">선생님</button></div>';
   h += '<table class="sg"><tr><th></th>';
   for (var p = 1; p <= g.periods; p++) h += '<th' + (cur === p ? ' class="now"' : '') + '>' + p + '</th>';
   h += '</tr>';
@@ -326,8 +332,9 @@ function schoolHtml(d) {
     h += '<tr><td class="cn' + (S.openCls === c ? ' on' : '') + '" onclick="openCls(\'' + c + '\')">' + esc(c.split('-')[1]) + '<small>반</small></td>';
     for (var p = 1; p <= g.periods; p++) {
       var x = r[p - 1], k = !x ? 'e' : x[1] === 'n' ? '' : x[1], sel = S.cell && S.cell.c === c && S.cell.p === p;
-      var click = x && (x[1] === 'c' || x[1] === 'x') ? ' onclick="cellInfo(\'' + c + '\',' + p + ')"' : '';
-      h += '<td class="' + k + (sel ? ' sel' : '') + (x && x[5] ? ' miss' : '') + '"' + click + '>' + (x ? esc(x[0]) : '') + '</td>';
+      var click = x && x[1] !== 'm' ? ' onclick="cellInfo(\'' + c + '\',' + p + ')"' : '';
+      var txt = !x ? '' : (showT && x[1] !== 'm' ? (x[1] === 'x' ? (x[4] || '') : (x[3] || x[0])) : x[0]);
+      h += '<td class="' + k + (sel ? ' sel' : '') + (x && x[5] ? ' miss' : '') + (showT ? ' tn' : '') + '"' + click + '>' + esc(txt) + '</td>';
     }
     h += '</tr>';
   });
@@ -335,9 +342,10 @@ function schoolHtml(d) {
   if (S.cell) {
     var x = ((day.rows[S.cell.c] || [])[S.cell.p - 1]) || null;
     if (x) h += '<div class="info"><b>' + esc(S.cell.c) + ' · ' + S.cell.p + '교시</b> ' + (x[1] === 'x' ? '수업 없음' + (x[4] ? ' (' + esc(x[4]) + ' 선생님 수업이 빠짐)' : '') :
-      esc(x[2] || '변경') + ' · ' + (x[4] ? esc(x[4]) + ' → ' : '') + esc(x[3]) + ' · ' + esc(x[0]) + (x[5] ? ' · <span class="mi">미확인</span>' : ' · <span class="ok">확인함</span>')) + '</div>';
+      x[1] === 'n' ? esc(x[0]) + ' · <b>' + esc(x[3] || '') + '</b> 선생님' :
+      esc(x[2] || '변경') + ' · ' + (x[4] ? esc(x[4]) + ' → ' : '') + '<b>' + esc(x[3]) + '</b> · ' + esc(x[0]) + (x[5] ? ' · <span class="mi">미확인</span>' : ' · <span class="ok">확인함</span>')) + '</div>';
   }
-  h += '<div class="legend2"><span><i class="lc"></i>바뀐 수업</span><span><i class="lm"></i>선생님 미확인</span><span>반 이름을 누르면 그 반 주간 시간표</span></div></div>';
+  h += '<div class="legend2"><span><i class="lc"></i>바뀐 수업</span><span><i class="lm"></i>선생님 미확인</span><span>칸을 누르면 과목·선생님 · 반 이름을 누르면 주간 시간표</span></div></div>';
   if (S.openCls) h += classWeekHtml(S.openCls, d);
   return h;
 }
@@ -348,11 +356,14 @@ function classWeekHtml(c, d) {
   h += '</tr>';
   for (var p = 1; p <= g.periods; p++) {
     h += '<tr><td class="pl">' + p + '</td>';
-    wk.forEach(function (x) { var y = (x.rows[c] || [])[p - 1]; var k = !y ? 'e' : y[1] === 'c' ? 'add' : y[1] === 'x' ? 'drop' : y[1] === 'm' ? 'e' : ''; h += '<td' + (k ? ' class="' + k + '"' : '') + '>' + (y ? esc(y[0]) : '') + '</td>'; });
+    wk.forEach(function (x) { var y = (x.rows[c] || [])[p - 1]; var k = !y ? 'e' : y[1] === 'c' ? 'add' : y[1] === 'x' ? 'drop' : y[1] === 'm' ? 'e' : '';
+      var tx = !y ? '' : y[1] === 'm' ? y[0] : '<b class="ws">' + esc(y[0]) + '</b><small class="wn">' + esc(y[1] === 'x' ? (y[4] || '') : (y[3] || '')) + '</small>';
+      h += '<td' + (k ? ' class="' + k + '"' : '') + '>' + tx + '</td>'; });
     h += '</tr>';
   }
   return h + '</table></div>';
 }
+function setShow(v) { S.sgShow = v; ls('tt.sgshow', v); render(); }
 function smove(n) { var days = sgDays(), i = days.indexOf(S.sday) + n; if (i >= 0 && i < days.length) { S.sday = days[i]; S.cell = null; render(); } }
 function setGrade(x) { S.grade = x; ls('tt.grade', x); S.cell = null; S.openCls = (S.openCls && S.openCls.split('-')[0] === x) ? S.openCls : null; render(); }
 function cellInfo(c, p) { S.cell = (S.cell && S.cell.c === c && S.cell.p === p) ? null : { c: c, p: p }; render(); }
