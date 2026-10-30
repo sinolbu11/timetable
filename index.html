@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>내 시간표</title>
+<meta name="description" content="심인고등학교 시간표와 바뀐 수업을 바로 확인해요.">
+<meta name="theme-color" content="#1A1C1E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="내 시간표">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<style>
+:root{--bg:#F6F6F3;--surface:#FFFFFF;--line:#E2E2DD;--line-soft:#EDEDE8;--fg:#1A1C1E;--muted:#5F6368;--faint:#8A8F94;
+--accent:#E8590C;--chg-bg:#FFF1E7;--chg-fg:#9A3412;--info-bg:#E3EBFF;--info-fg:#1E3A8A;--info-line:#3B6FD8;
+--off-bg:#F1F1EC;--off-line:#A3A3A0;--bad-bg:#FBE4E6;--bad-fg:#9F1239;--ok-bg:#E6F4EA;--ok-fg:#14532D;--today:#EEF3FF}
+@media (prefers-color-scheme: dark){:root{--bg:#121314;--surface:#1C1E20;--line:#2E3134;--line-soft:#26292C;--fg:#ECEDEE;--muted:#A2A7AC;--faint:#80858A;
+--accent:#FF7A33;--chg-bg:#33200F;--chg-fg:#FFB48A;--info-bg:#1E2A44;--info-fg:#A9C1FF;--info-line:#6E93E8;--off-bg:#232527;--off-line:#5C6064;
+--bad-bg:#3A1620;--bad-fg:#FDA4AF;--ok-bg:#163322;--ok-fg:#A7E3BC;--today:#1A2233;color-scheme:dark}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--fg)}
+body{font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",system-ui,sans-serif;font-size:16px;line-height:1.5;
+ padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+button,input{font-family:inherit;color:inherit;font-size:16px}
+.wrap{max-width:520px;margin:0 auto;padding:14px 16px 40px}
+.top{display:flex;align-items:center;gap:10px;margin:4px 0 12px}
+.top h1{margin:0;font-size:22px;letter-spacing:-.02em;line-height:1.2}
+.top .sub{font-size:12.5px;color:var(--muted)}
+.top .grow{flex:1;min-width:0}
+.icon-btn{width:42px;height:42px;border-radius:12px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;cursor:pointer;flex:none}
+.icon-btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.icon-btn.spin svg{animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px;margin-bottom:12px}
+.card h2{margin:0 0 8px;font-size:15px;display:flex;align-items:center;gap:8px}
+.count{font-size:12px;font-weight:700;color:#fff;background:var(--accent);border-radius:999px;padding:1px 9px}
+.next{background:var(--info-bg);color:var(--info-fg);border-radius:16px;padding:12px 14px;margin-bottom:12px;line-height:1.55;font-size:15px}
+.next b{font-weight:700}
+.daynav{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.daynav .t{flex:1;text-align:center;font-weight:700;font-size:16px}
+.daynav button{width:40px;height:36px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-size:14px;cursor:pointer}
+.todaybtn{display:block;margin:0 auto 8px;border:0;background:none;color:var(--info-line);font-size:13px;font-weight:700;cursor:pointer}
+.band{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 8px}.band span{font-size:12.5px;font-weight:700;border-radius:8px;padding:3px 9px;background:var(--today);color:var(--info-fg)}
+.band span.off{background:var(--bad-bg);color:var(--bad-fg)}
+.row{display:flex;align-items:center;gap:12px;min-height:50px;padding:4px 10px;border-radius:12px}
+.row+.row{margin-top:2px}
+.row .p{width:44px;flex:none;font-weight:700;font-size:14px;color:var(--muted);line-height:1.15}
+.row .p small{display:block;font-size:11px;font-weight:400;color:var(--faint)}
+.row .t{flex:1;min-width:0;font-size:16px}.row .t small{color:var(--muted);font-size:12.5px;margin-left:6px}
+.row.free .t{color:var(--faint)}
+.row.add{background:var(--chg-bg)}.row.add .t{color:var(--chg-fg);font-weight:700}
+.row.drop .t{color:var(--faint);text-decoration:line-through}
+.row.bad{background:var(--bad-bg)}.row.bad .t{color:var(--bad-fg);font-weight:700}
+.row.now{outline:2px solid var(--info-line);outline-offset:-2px}
+.row .t s{font-weight:400;color:var(--faint);margin-right:6px}
+.tag{flex:none;font-size:11px;font-weight:700;border-radius:6px;padding:3px 8px;color:#fff;background:var(--accent)}
+.tag.drop{color:var(--muted);background:var(--off-bg)}.tag.bad{color:var(--bad-fg);background:var(--bad-bg)}.tag.now{background:var(--info-line)}
+.chg{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:14px;border:1px solid var(--line)}
+.chg+.chg{margin-top:8px}
+.chg.in{background:var(--chg-bg);border:1.5px solid var(--accent)}.chg.warn{border-color:var(--bad-fg)}
+.chg .w{flex:1;min-width:0}.chg .m{font-weight:700;font-size:15px}.chg .s{font-size:13px;color:var(--muted)}
+.chg.in .s{color:var(--chg-fg)}
+.ack{flex:none;border:1.5px solid var(--accent);background:var(--surface);color:var(--chg-fg);font-weight:700;border-radius:10px;padding:8px 10px;font-size:13px;cursor:pointer}
+.ack:disabled{opacity:.6}.acked{flex:none;font-size:12px;font-weight:700;color:var(--ok-fg)}
+.empty{color:var(--muted);font-size:14px;margin:4px 2px}
+.adm{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-bottom:12px}
+.adm .h{font-weight:700;font-size:14px;margin-bottom:6px}.adm .chips{display:flex;flex-wrap:wrap;gap:6px}
+.adm .chips span{font-size:12.5px;border-radius:8px;padding:3px 9px;background:var(--off-bg)}.adm .chips span.hot{background:var(--chg-bg);color:var(--chg-fg);font-weight:700}
+.adm ul{margin:8px 0 0;padding-left:18px;font-size:13.5px;color:var(--muted)}.adm li{margin:2px 0}
+details.week{margin-bottom:12px}
+details.week summary{cursor:pointer;list-style:none;font-size:14px;font-weight:700;color:var(--muted);padding:10px 4px}
+details.week summary::-webkit-details-marker{display:none}
+details.week summary::before{content:"▸ ";}details.week[open] summary::before{content:"▾ ";}
+table.g{border-collapse:separate;border-spacing:3px;width:100%;table-layout:fixed}
+table.g th{font-size:12px;color:var(--muted);padding:2px 0;border-radius:7px}table.g th.today{background:var(--fg);color:var(--bg)}table.g th.pl{width:18px}
+table.g td{height:42px;border:1px solid var(--line-soft);border-radius:7px;text-align:center;font-size:11.5px;line-height:1.2;padding:2px 1px;word-break:keep-all;background:var(--surface)}
+table.g td.pl{border:0;background:none;color:var(--muted);font-weight:700}
+table.g td.e{border-style:dashed;background:none}table.g td.add{background:var(--chg-bg);border:1.5px solid var(--accent);color:var(--chg-fg);font-weight:700}
+table.g td.drop{background:var(--off-bg);color:var(--faint);text-decoration:line-through}table.g td.bad{background:var(--bad-bg);color:var(--bad-fg)}
+.foot{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:6px;font-size:12.5px;color:var(--muted)}
+.link{border:0;background:none;color:var(--muted);text-decoration:underline;font-size:13px;cursor:pointer;padding:6px 0}
+.err{background:var(--bad-bg);color:var(--bad-fg);border-radius:12px;padding:10px 12px;margin-bottom:12px;font-size:14px}
+.hint{background:var(--surface);border:1px dashed var(--line);border-radius:14px;padding:10px 12px;margin-bottom:12px;font-size:13.5px;color:var(--muted);display:flex;gap:8px;align-items:center}
+.hint .grow{flex:1}
+.btn{min-height:48px;border-radius:14px;border:1px solid var(--line);background:var(--surface);font-weight:700;cursor:pointer;padding:0 16px}
+.btn.primary{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.btn.small{min-height:36px;font-size:14px;border-radius:10px}
+.setup{display:flex;flex-direction:column;gap:12px;margin-top:8vh}
+.setup .logo{width:64px;height:64px;border-radius:16px}
+.setup h1{margin:6px 0 0;font-size:26px}
+.setup p{margin:0;color:var(--muted)}
+.choice{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+.choice button{min-height:96px;border-radius:18px;border:1px solid var(--line);background:var(--surface);font-size:18px;font-weight:700;cursor:pointer}
+.choice small{display:block;font-size:12.5px;font-weight:400;color:var(--muted);margin-top:4px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field input{min-height:52px;border-radius:14px;border:1px solid var(--line);background:var(--surface);padding:0 14px;font-size:20px;letter-spacing:.12em;text-transform:uppercase}
+.grid-cls h3{margin:12px 0 6px;font-size:14px;color:var(--muted)}
+.grid-cls .b{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.grid-cls button{min-height:52px;border-radius:14px;border:1px solid var(--line);background:var(--surface);font-weight:700;font-size:16px;cursor:pointer}
+.msg{font-size:14px;color:var(--bad-fg)}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<script>
+// ───────────────────────────────────────────────
+// 학교 시간표 시트의 "PC 앱용" 배포 주소 (액세스: 모든 사용자)
+var API = 'https://script.google.com/macros/s/AKfycbwfjmnh56py7G_Bs-1wSv_Bf6CPQLYwP5QMcRwXevhIvBkv8YDeuYQbCztsrGoAI2MV/exec';
+// ───────────────────────────────────────────────
+var S = { mode: '', code: '', cls: '', data: null, at: 0, dsel: '', busy: false, err: '', step: '', classes: null, msg: '' };
+var DOW = ['일', '월', '화', '수', '목', '금', '토'];
+
+function ls(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; } }
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+function pad(n) { return (n < 10 ? '0' : '') + n; }
+function ymd(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+function parse(y) { var p = y.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
+function addDays(y, n) { var d = parse(y); d.setDate(d.getDate() + n); return ymd(d); }
+function today() { return ymd(new Date()); }
+function monday(y) { var d = parse(y), w = d.getDay(); if (w === 6) d.setDate(d.getDate() + 2); else if (w === 0) d.setDate(d.getDate() + 1); else d.setDate(d.getDate() + 1 - w); return ymd(d); }
+function md(y) { var d = parse(y); return (d.getMonth() + 1) + '/' + d.getDate(); }
+function dowOf(y) { return DOW[parse(y).getDay()]; }
+function hm(s) { var a = String(s).split(':'); return (+a[0]) * 60 + (+a[1]); }
+function nowMin() { var n = new Date(); return n.getHours() * 60 + n.getMinutes(); }
+function hhmm(ms) { var d = new Date(ms); return pad(d.getHours()) + ':' + pad(d.getMinutes()); }
+
+function api(params) {
+  var q = Object.keys(params).map(function (k) { return k + '=' + encodeURIComponent(params[k]); }).join('&');
+  return fetch(API + '?' + q, { cache: 'no-store', redirect: 'follow' }).then(function (r) { return r.text(); }).then(function (t) {
+    if (/^\s*</.test(t)) throw new Error('학교 시트에 연결하지 못했어요. (PC 앱용 배포의 액세스가 "모든 사용자"인지 수업계에 확인해 주세요)');
+    var j = JSON.parse(t);
+    if (!j.ok) throw new Error(j.error || '데이터를 받지 못했어요.');
+    return j;
+  });
+}
+
+// ---------- 불러오기 ----------
+function cacheKey() { return S.mode === 't' ? 'tt.cache.t' : 'tt.cache.s.' + S.cls; }
+function loadCache() {
+  try { var c = JSON.parse(ls(cacheKey()) || 'null'); if (c && c.data) { S.data = c.data; S.at = c.at; } } catch (e) { }
+}
+function saveCache() { try { ls(cacheKey(), JSON.stringify({ data: S.data, at: S.at })); } catch (e) { } }
+function refresh(force) {
+  if (S.busy) return;
+  if (!force && S.data && Date.now() - S.at < 120000 && S.data._from === monday(today())) return;
+  S.busy = true; S.err = ''; render();
+  var p = S.mode === 't' ? { code: S.code, from: monday(today()), days: 12 } : { api: 'class', cls: S.cls };
+  api(p).then(function (d) {
+    d._from = monday(today());
+    S.data = d; S.at = Date.now(); saveCache();
+  }).catch(function (e) {
+    S.err = (e && e.message) || '연결하지 못했어요.';
+    if (/개인 코드가 맞지/.test(S.err)) { S.mode = ''; ls('tt.mode', null); S.step = 'code'; S.msg = S.err; }
+  }).then(function () { S.busy = false; render(); });
+}
+
+// ---------- 하루 수업 계산 ----------
+function teacherRows(d, day) {
+  var mine = (day.slots || {})[d.name] || {}, rows = [];
+  for (var p = 1; p <= d.periods; p++) {
+    var L = mine[p] || [], live = L.filter(function (e) { return e[3] !== 'removed'; }), gone = L.filter(function (e) { return e[3] === 'removed'; });
+    var bad = !!((day.conflicts || {})[p]);
+    if (live.length) {
+      var added = live.filter(function (e) { return e[3] === 'added'; });
+      rows.push({ p: p, kind: bad ? 'bad' : added.length ? 'add' : 'n', tag: bad ? '겹침' : added.length ? added[0][4] : '',
+        text: live.map(function (e) { return esc(e[0]) + ' ' + esc(e[1]) + (e[2] ? '<small>' + esc(e[2]) + '</small>' : ''); }).join(', '),
+        short: live[0][0] + ' ' + live[0][1] });
+    } else if (gone.length) {
+      rows.push({ p: p, kind: 'drop', tag: '빠짐', text: gone.map(function (e) { return esc(e[0]) + ' ' + esc(e[1]); }).join(', ') });
+    } else rows.push({ p: p, kind: 'free', text: '공강' });
+  }
+  return rows;
+}
+function classRows(d, day) {
+  var rows = [];
+  for (var p = 1; p <= d.periods; p++) {
+    var sl = (day.slots || {})[p] || { items: [] }, L = sl.items || [];
+    if (!L.length) { rows.push({ p: p, kind: 'free', text: '수업 없음' }); continue; }
+    var ch = L.filter(function (x) { return x.k === 'c'; });
+    if (ch.length) {
+      var nowS = L.map(function (x) { return x.s; }).join(', ');
+      rows.push({ p: p, kind: 'add', tag: ch[0].t || '변경', short: nowS,
+        text: (sl.was && sl.was !== nowS ? '<s>' + esc(sl.was) + '</s>' : '') + L.map(function (x) { return esc(x.s) + (x.r ? '<small>' + esc(x.r) + '</small>' : ''); }).join(', ') });
+    } else if (L[0].k === 'm') rows.push({ p: p, kind: 'free', text: '선택 과목 (각자 교실)', short: '선택 과목' });
+    else if (L[0].k === 'x') rows.push({ p: p, kind: 'drop', tag: '없음', text: esc(L[0].s) });
+    else rows.push({ p: p, kind: 'n', short: L.map(function (x) { return x.s; }).join(', '),
+      text: L.map(function (x) { return esc(x.s) + (x.r ? '<small>' + esc(x.r) + '</small>' : ''); }).join(', ') });
+  }
+  return rows;
+}
+function rowsFor(date) {
+  var d = S.data; if (!d) return null;
+  var day = (d.days || []).filter(function (x) { return x.date === date; })[0];
+  if (!day) return null;
+  return S.mode === 't' ? teacherRows(d, day) : classRows(d, day);
+}
+function nowNext(rows, bells) {
+  if (!bells || !bells.length || !rows) return '';
+  var m = nowMin(), h = '', cur = null;
+  bells.forEach(function (b) { if (m >= hm(b.s) && m < hm(b.e)) cur = b; });
+  if (cur) { var r = rows[cur.p - 1]; h = '지금 <b>' + cur.p + '교시</b> · ' + (r && r.short ? esc(r.short) : (S.mode === 't' ? '공강' : '수업 없음')) + ' (' + cur.e + '까지)'; }
+  for (var i = 0; i < bells.length; i++) {
+    var b = bells[i], r2 = rows[b.p - 1];
+    if (hm(b.s) > m && r2 && r2.short) {
+      var left = hm(b.s) - m;
+      var s2 = '다음 <b>' + b.p + '교시 ' + esc(r2.short) + '</b> · ' + b.s + ' (' + (left >= 60 ? Math.floor(left / 60) + '시간 ' + (left % 60) + '분' : left + '분') + ' 뒤)';
+      h = h ? h + '<br>' + s2 : s2; break;
+    }
+  }
+  if (!h && m > hm(bells[bells.length - 1].e)) h = '오늘 수업이 모두 끝났어요.';
+  return h ? '<div class="next">' + h + '</div>' : '';
+}
+function schoolDays() { return (S.data && S.data.days || []).map(function (x) { return x.date; }); }
+
+// ---------- 화면 ----------
+var ICON_REFRESH = '<svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>';
+function render() {
+  var app = document.getElementById('app');
+  if (!S.mode) { app.innerHTML = setupHtml(); afterSetup(); return; }
+  var d = S.data, h = '';
+  var title = S.mode === 't' ? (d && d.name ? esc(d.name) + ' 선생님' : '내 시간표') : esc(S.cls) + ' 시간표';
+  h += '<div class="top"><div class="grow"><div class="sub">' + esc(d && d.school || '') + (S.at ? ' · ' + hhmm(S.at) + ' 확인' : '') + '</div><h1>' + title + '</h1></div>' +
+       '<button class="icon-btn' + (S.busy ? ' spin' : '') + '" onclick="refresh(true)" aria-label="새로고침">' + ICON_REFRESH + '</button></div>';
+  if (S.err) h += '<div class="err">' + esc(S.err) + (d ? '<br><small>저장해 둔 시간표를 보여 드려요.</small>' : '') + '</div>';
+  if (installHint()) h += installHint();
+  if (!d) { h += '<div class="card"><p class="empty">' + (S.busy ? '시간표를 받아 오는 중이에요…' : '시간표가 아직 없어요. 오른쪽 위 새로고침을 눌러 주세요.') + '</p></div>'; app.innerHTML = h + footHtml(); return; }
+
+  var tdy = today(), days = schoolDays();
+  if (!S.dsel || days.indexOf(S.dsel) < 0) S.dsel = days.indexOf(tdy) >= 0 ? tdy : (days.filter(function (x) { return x >= tdy; })[0] || days[0]);
+  var rows = rowsFor(S.dsel) || [], isT = S.dsel === tdy;
+
+  if (S.mode === 't' && d.admin) h += adminHtml(d.admin);
+  if (isT) h += nowNext(rows, d.bells);
+
+  // 하루 카드
+  var di = days.indexOf(S.dsel);
+  h += '<div class="card" id="daycard"><div class="daynav"><button onclick="dmove(-1)" ' + (di <= 0 ? 'disabled' : '') + ' aria-label="전날">◀</button>' +
+       '<div class="t">' + (isT ? '오늘 · ' : '') + md(S.dsel) + ' (' + dowOf(S.dsel) + ')</div>' +
+       '<button onclick="dmove(1)" ' + (di >= days.length - 1 ? 'disabled' : '') + ' aria-label="다음날">▶</button></div>';
+  if (!isT && days.indexOf(tdy) >= 0) h += '<button class="todaybtn" onclick="dgo(\'' + tdy + '\')">오늘로</button>';
+  var sc = (d.sched || {})[S.dsel];
+  if (sc && sc.length) h += '<div class="band">' + sc.map(function (x) { return '<span class="' + (x.off ? 'off' : '') + '">' + esc(x.n) + (x.g ? ' (' + esc(x.g) + ')' : '') + '</span>'; }).join('') + '</div>';
+  var cur = null, m = nowMin();
+  if (isT) (d.bells || []).forEach(function (b) { if (m >= hm(b.s) && m < hm(b.e)) cur = b.p; });
+  rows.forEach(function (r) {
+    var bl = (d.bells || [])[r.p - 1], cls = 'row ' + r.kind + (cur === r.p ? ' now' : '');
+    var tag = r.tag ? '<span class="tag ' + (r.kind === 'drop' ? 'drop' : r.kind === 'bad' ? 'bad' : '') + '">' + esc(r.tag) + '</span>' : (cur === r.p ? '<span class="tag now">지금</span>' : '');
+    h += '<div class="' + cls + '"><span class="p">' + r.p + '교시' + (bl ? '<small>' + bl.s + '</small>' : '') + '</span><span class="t">' + r.text + '</span>' + tag + '</div>';
+  });
+  h += '</div>';
+
+  // 바뀐 수업 (오늘부터)
+  var ch = (d.changes || []).filter(function (c) { return c.date >= tdy; }).sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : a.period - b.period; });
+  h += '<div class="card"><h2>바뀐 수업' + (ch.length ? '<span class="count">' + ch.length + '</span>' : '') + '</h2>';
+  if (!ch.length) h += '<p class="empty">앞으로 2주 동안 바뀐 수업이 없어요.</p>';
+  ch.forEach(function (c) { h += S.mode === 't' ? teacherChange(c, d) : classChange(c); });
+  h += '</div>';
+
+  h += weekHtml(d);
+  app.innerHTML = h + footHtml();
+  swipe();
+}
+function teacherChange(c, d) {
+  var inn = c.to === d.name, warn = /^⚠/.test(c.status || '');
+  var who = inn ? (c.from ? esc(c.from) + ' 선생님 수업에 들어가요' : '새로 들어가요') : (c.to ? esc(c.to) + ' 선생님이 들어가요' : '수업이 빠져요');
+  var tag = warn ? '<span class="tag bad">확인 중</span>' : inn ? '<span class="tag">' + esc(c.type) + '</span>' : '<span class="tag drop">빠짐</span>';
+  var ab = '';
+  if (inn && !warn && c.acked === false) ab = '<button class="ack" onclick="ack(' + c.row + ',this)">확인했어요</button>';
+  else if (inn && c.acked) ab = '<span class="acked">✓ 확인함</span>';
+  return '<div class="chg' + (inn ? ' in' : '') + (warn ? ' warn' : '') + '">' + tag + '<div class="w"><div class="m">' + md(c.date) + '(' + dowOf(c.date) + ') ' + c.period + '교시 · ' + esc(c.cls) + '</div><div class="s">' + (c.subject ? esc(c.subject) + ' · ' : '') + who + '</div></div>' + ab + '</div>';
+}
+function classChange(c) {
+  return '<div class="chg in">' + (c.type ? '<span class="tag">' + esc(c.type) + '</span>' : '') + '<div class="w"><div class="m">' + md(c.date) + '(' + dowOf(c.date) + ') ' + c.period + '교시</div><div class="s">' +
+    (c.was && c.was !== c.now ? esc(c.was) + ' → ' : '') + esc(c.now || '수업 없음') + '</div></div></div>';
+}
+function adminHtml(a) {
+  var h = '<div class="adm"><div class="h">학교 전체 · 오늘</div><div class="chips">' +
+    '<span class="' + (a.todayCount ? 'hot' : '') + '">오늘 ' + a.todayCount + '건</span><span>이번 주 ' + a.week + '건</span>' +
+    '<span class="' + (a.unacked ? 'hot' : '') + '">미확인 ' + a.unacked + '건</span>' + (a.warn ? '<span class="hot">확인 필요 ' + a.warn + '건</span>' : '') + '</div>';
+  if (a.today && a.today.length) {
+    h += '<ul>' + a.today.slice(0, 6).map(function (x) {
+      var m = String(x.desc || '').match(/([^\s/]+→[^\s/(]+)/);
+      return '<li>' + x.period + '교시 ' + esc(x.cls) + ' ' + esc(x.type) + (m ? ' · ' + esc(m[1]) : '') + (x.miss && x.miss.length ? ' <b>(미확인: ' + esc(x.miss.join(', ')) + ')</b>' : '') + '</li>';
+    }).join('') + '</ul>';
+  }
+  return h + '</div>';
+}
+function weekHtml(d) {
+  var mon = monday(today()), days = (d.days || []).filter(function (x) { return x.date >= mon && x.date <= addDays(mon, 4); });
+  if (!days.length) return '';
+  var tdy = today(), h = '<details class="week"' + (ls('tt.week') === '1' ? ' open' : '') + ' ontoggle="ls(\'tt.week\', this.open ? \'1\' : \'0\')"><summary>이번 주 한눈에 보기</summary><div class="card" style="padding:8px"><table class="g"><tr><th class="pl"></th>';
+  days.forEach(function (x) { h += '<th' + (x.date === tdy ? ' class="today"' : '') + '>' + dowOf(x.date) + ' ' + parse(x.date).getDate() + '</th>'; });
+  h += '</tr>';
+  var R = days.map(function (x) { return S.mode === 't' ? teacherRows(d, x) : classRows(d, x); });
+  for (var p = 1; p <= d.periods; p++) {
+    h += '<tr><td class="pl">' + p + '</td>';
+    R.forEach(function (rows) {
+      var r = rows[p - 1] || { kind: 'free' }, c = r.kind === 'free' ? 'e' : r.kind === 'n' ? '' : r.kind;
+      var t = r.kind === 'free' ? '' : esc((r.short || r.text.replace(/<[^>]+>/g, ' ')).split(' ').slice(0, S.mode === 't' ? 1 : 3).join(' '));
+      h += '<td' + (c ? ' class="' + c + '"' : '') + '>' + t + '</td>';
+    });
+    h += '</tr>';
+  }
+  return h + '</table></div></details>';
+}
+function footHtml() {
+  return '<div class="foot"><span>' + (S.mode === 't' ? '선생님 모드' : '학생 모드') + '</span><button class="link" onclick="logout()">' + (S.mode === 't' ? '개인 코드 바꾸기' : '반 바꾸기') + '</button></div>';
+}
+
+// ---------- 설치 안내 ----------
+var deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); deferredPrompt = e; render(); });
+function standalone() { return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true; }
+function isIOS() { return /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); }
+function installHint() {
+  if (standalone() || ls('tt.hint') === 'no') return '';
+  if (deferredPrompt) return '<div class="hint"><span class="grow">홈 화면에 앱으로 설치할 수 있어요.</span><button class="btn small primary" onclick="install()">설치</button><button class="link" onclick="ls(\'tt.hint\',\'no\');render()">닫기</button></div>';
+  if (isIOS()) return '<div class="hint"><span class="grow">아래 <b>공유</b> 버튼 → <b>홈 화면에 추가</b>를 누르면 앱처럼 쓸 수 있어요.</span><button class="link" onclick="ls(\'tt.hint\',\'no\');render()">닫기</button></div>';
+  return '';
+}
+function install() { if (!deferredPrompt) return; deferredPrompt.prompt(); deferredPrompt.userChoice.then(function () { deferredPrompt = null; render(); }); }
+
+// ---------- 처음 설정 ----------
+function setupHtml() {
+  var h = '<div class="setup"><img class="logo" src="icons/icon-192.png" alt=""><h1>내 시간표</h1>';
+  if (S.step === 'code') {
+    h += '<p>학교 메일로 받은 <b>개인 코드 8자리</b>를 넣어 주세요.</p><div class="field"><input id="code" maxlength="12" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="예: AB12CD34" value="' + esc(S.code) + '"></div>' +
+         (S.msg ? '<div class="msg">' + esc(S.msg) + '</div>' : '') +
+         '<button class="btn primary" id="go" onclick="checkCode()">' + (S.busy ? '확인하는 중…' : '확인') + '</button><button class="link" onclick="S.step=\'\';S.msg=\'\';render()">← 처음으로</button>';
+  } else if (S.step === 'class') {
+    h += '<p>우리 반을 골라 주세요. 한 번 고르면 다음부터 바로 열려요.</p>';
+    if (!S.classes) h += '<p class="empty">' + (S.msg ? esc(S.msg) : '반 목록을 받아 오는 중이에요…') + '</p>';
+    else {
+      h += '<div class="grid-cls">'; var g = '';
+      S.classes.forEach(function (c) { var gg = c.split('-')[0]; if (gg !== g) { if (g) h += '</div>'; g = gg; h += '<h3>' + g + '학년</h3><div class="b">'; } h += '<button onclick="pickClass(\'' + c + '\')">' + esc(c) + '</button>'; });
+      h += '</div></div>';
+    }
+    h += '<button class="link" onclick="S.step=\'\';S.msg=\'\';render()">← 처음으로</button>';
+  } else {
+    h += '<p>누가 쓰시나요?</p><div class="choice"><button onclick="S.step=\'code\';render()">선생님<small>개인 코드로</small></button><button onclick="startClass()">학생<small>반 고르기</small></button></div>';
+  }
+  return h + '</div>';
+}
+function afterSetup() { var i = document.getElementById('code'); if (i) { i.focus(); i.onkeydown = function (e) { if (e.key === 'Enter') checkCode(); }; } }
+function checkCode() {
+  var v = (document.getElementById('code').value || '').trim().toUpperCase().replace(/\s/g, '');
+  if (!v) return; S.code = v; S.busy = true; S.msg = ''; render();
+  api({ code: v, from: monday(today()), days: 12 }).then(function (d) {
+    d._from = monday(today());
+    S.mode = 't'; ls('tt.mode', 't'); ls('tt.code', v); S.data = d; S.at = Date.now(); saveCache(); S.step = ''; S.err = '';
+  }).catch(function (e) { S.msg = (e && e.message) || '확인하지 못했어요.'; }).then(function () { S.busy = false; render(); });
+}
+function startClass() {
+  S.step = 'class'; S.msg = ''; render();
+  api({ api: 'classes' }).then(function (d) { S.classes = d.classes; }).catch(function (e) { S.msg = e.message; }).then(render);
+}
+function pickClass(c) { S.mode = 's'; S.cls = c; ls('tt.mode', 's'); ls('tt.cls', c); S.data = null; S.at = 0; S.step = ''; loadCache(); render(); refresh(true); }
+function logout() {
+  if (!confirm(S.mode === 't' ? '개인 코드를 다시 넣을까요?' : '반을 다시 고를까요?')) return;
+  ls('tt.cache.t', null); ls('tt.code', null); ls('tt.mode', null); ls('tt.cls', null);
+  S.mode = ''; S.code = ''; S.cls = ''; S.data = null; S.at = 0; S.step = ''; S.err = ''; render();
+}
+
+// ---------- 날짜 넘기기 ----------
+function dmove(n) { var days = schoolDays(), i = days.indexOf(S.dsel) + n; if (i >= 0 && i < days.length) { S.dsel = days[i]; render(); } }
+function dgo(y) { S.dsel = y; render(); }
+function swipe() {
+  var el = document.getElementById('daycard'); if (!el) return; var x0 = null, y0 = null;
+  el.addEventListener('touchstart', function (e) { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive: true });
+  el.addEventListener('touchend', function (e) {
+    if (x0 === null) return; var dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0; x0 = null;
+    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) dmove(dx < 0 ? 1 : -1);
+  }, { passive: true });
+}
+
+// ---------- 확인했어요 ----------
+function ack(row, btn) {
+  btn.disabled = true; btn.textContent = '보내는 중…';
+  api({ code: S.code, ack: row }).then(function () {
+    (S.data.changes || []).forEach(function (c) { if (c.row === row && c.to === S.data.name) c.acked = true; });
+    saveCache(); render();
+  }).catch(function (e) { btn.disabled = false; btn.textContent = '확인했어요'; alert('보내지 못했어요: ' + e.message); });
+}
+
+// ---------- 시작 ----------
+S.mode = ls('tt.mode') || ''; S.code = ls('tt.code') || ''; S.cls = ls('tt.cls') || '';
+if (S.mode === 't' && !S.code) S.mode = '';
+if (S.mode === 's' && !S.cls) S.mode = '';
+if (S.mode) { loadCache(); render(); refresh(false); } else render();
+document.addEventListener('visibilitychange', function () { if (!document.hidden && S.mode) { if (Date.now() - S.at > 300000) refresh(true); else render(); } });
+setInterval(function () { if (!document.hidden && S.mode) { if (Date.now() - S.at > 600000) refresh(true); else render(); } }, 60000);
+if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(function () { });
+</script>
+</body>
+</html>
