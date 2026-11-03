@@ -267,7 +267,8 @@ function render() {
   if (!S.dsel || days.indexOf(S.dsel) < 0) S.dsel = days.indexOf(tdy) >= 0 ? tdy : (days.filter(function (x) { return x >= tdy; })[0] || days[0]);
   var rows = rowsFor(S.dsel) || [], isT = S.dsel === tdy;
 
-  if (isT) h += nowNext(rows, d.bells);
+  var dayObj = (d.days || []).filter(function (x) { return x.date === S.dsel; })[0] || {}, dBells = dayObj.bells || d.bells;
+  if (isT) h += nowNext(rows, dBells);
 
   // 하루 카드
   var di = days.indexOf(S.dsel);
@@ -277,10 +278,11 @@ function render() {
   if (!isT && days.indexOf(tdy) >= 0) h += '<button class="todaybtn" onclick="dgo(\'' + tdy + '\')">오늘로</button>';
   var sc = (d.sched || {})[S.dsel];
   if (sc && sc.length) h += '<div class="band">' + sc.map(function (x) { return '<span class="' + (x.off ? 'off' : '') + '">' + esc(x.n) + (x.g ? ' (' + esc(x.g) + ')' : '') + '</span>'; }).join('') + '</div>';
+  if (dayObj.bellNote) h += '<div class="band"><span>⏰ ' + esc(dayObj.bellNote) + '</span></div>';
   var cur = null, m = nowMin();
-  if (isT) (d.bells || []).forEach(function (b) { if (m >= hm(b.s) && m < hm(b.e)) cur = b.p; });
+  if (isT) (dBells || []).forEach(function (b) { if (m >= hm(b.s) && m < hm(b.e)) cur = b.p; });
   rows.forEach(function (r) {
-    var bl = (d.bells || [])[r.p - 1], cls = 'row ' + r.kind + (cur === r.p ? ' now' : '');
+    var bl = (dBells || [])[r.p - 1], cls = 'row ' + r.kind + (cur === r.p ? ' now' : '');
     var tag = r.tag ? '<span class="tag ' + (r.kind === 'drop' ? 'drop' : r.kind === 'bad' ? 'bad' : '') + '">' + esc(r.tag) + '</span>' : (cur === r.p ? '<span class="tag now">지금</span>' : '');
     h += '<div class="' + cls + '"><span class="p">' + r.p + '교시' + (bl ? '<small>' + bl.s + '</small>' : '') + '</span><span class="t">' + r.text + '</span>' + tag + '</div>';
   });
