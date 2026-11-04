@@ -100,6 +100,12 @@ table.g td.drop{background:var(--off-bg);color:var(--faint);text-decoration:line
 .grid-cls .b{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .grid-cls button{min-height:52px;border-radius:14px;border:1px solid var(--line);background:var(--surface);font-weight:700;font-size:16px;cursor:pointer}
 .msg{font-size:14px;color:var(--bad-fg)}
+.card.home{border:1.5px solid var(--accent)}
+.hl{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:12px;background:var(--chg-bg)}.hl+.hl{margin-top:6px}
+.hl .p{width:44px;flex:none;font-weight:700;font-size:14px;color:var(--chg-fg)}.hl .t{flex:1;min-width:0;font-size:15px;color:var(--chg-fg)}
+.hl .t small{display:block;font-size:12.5px;color:var(--muted)}.hl.warn{background:var(--bad-bg)}
+.new{flex:none;font-size:10.5px;font-weight:800;color:#fff;background:var(--bad-fg);border-radius:6px;padding:2px 6px;margin-left:4px}
+.sub2{font-size:12.5px;font-weight:700;color:var(--muted);margin:10px 2px 6px}
 .seg{display:flex;border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:12px;background:var(--surface)}
 .seg button{flex:1;border:0;background:none;padding:10px 0;font-size:15px;font-weight:700;color:var(--muted);cursor:pointer}
 .seg button.on{background:var(--fg);color:var(--bg)}
@@ -269,6 +275,8 @@ function render() {
 
   var dayObj = (d.days || []).filter(function (x) { return x.date === S.dsel; })[0] || {}, dBells = dayObj.bells || d.bells;
   if (isT) h += nowNext(rows, dBells);
+  if (S.mode === 't' && d.homeroom) h += homeHtml(d);
+  if (S.mode === 's') h += classTopHtml(d);
 
   // 하루 카드
   var di = days.indexOf(S.dsel);
@@ -370,6 +378,21 @@ function setGrade(x) { S.grade = x; ls('tt.grade', x); S.cell = null; S.openCls 
 function cellInfo(c, p) { S.cell = (S.cell && S.cell.c === c && S.cell.p === p) ? null : { c: c, p: p }; render(); }
 function openCls(c) { S.openCls = S.openCls === c ? null : c; render(); if (S.openCls) { var el = document.getElementById('clsweek'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); } }
 
+// 담임 아침 요약: 오늘(과 다음 수업일) 우리 반 바뀐 수업
+function homeLine(c) {
+  var subj = c.was && c.now && c.was !== c.now ? esc(c.was) + ' → <b>' + esc(c.now) + '</b>' : '<b>' + esc(c.now || c.was) + '</b>';
+  var who = c.to ? (c.from && c.from !== c.to ? esc(c.from) + ' → ' : '') + esc(c.to) + ' 선생님' : '';
+  return '<div class="hl' + (c.warn ? ' warn' : '') + '"><span class="p">' + c.period + '교시</span><span class="t">' + subj + (who ? '<small>' + who + '</small>' : '') + '</span><span class="tag">' + esc(c.type) + '</span></div>';
+}
+function homeHtml(d) {
+  var tdy = today(), days = schoolDays(), next = days.filter(function (x) { return x > tdy; })[0];
+  var hc = d.homeChanges || [], T = hc.filter(function (c) { return c.date === tdy; }), N = next ? hc.filter(function (c) { return c.date === next; }) : [];
+  var h = '<div class="card home"><h2>우리 반 ' + esc(d.homeroom) + ' · 오늘' + (T.length ? '<span class="count">' + T.length + '</span>' : '') + '</h2>';
+  h += T.length ? T.map(homeLine).join('') : '<p class="empty">오늘 우리 반 시간표는 그대로예요.</p>';
+  if (N.length) h += '<div class="sub2">' + md(next) + '(' + dowOf(next) + ') 미리 보기</div>' + N.map(homeLine).join('');
+  return h + '</div>';
+}
+
 function teacherChange(c, d) {
   var inn = c.to === d.name, warn = /^⚠/.test(c.status || '');
   var who = inn ? (c.from ? esc(c.from) + ' 선생님 수업에 들어가요' : '새로 들어가요') : (c.to ? esc(c.to) + ' 선생님이 들어가요' : '수업이 빠져요');
@@ -378,6 +401,27 @@ function teacherChange(c, d) {
   if (inn && !warn && c.acked === false) ab = '<button class="ack" onclick="ack(' + c.row + ',this)">확인했어요</button>';
   else if (inn && c.acked) ab = '<span class="acked">✓ 확인함</span>';
   return '<div class="chg' + (inn ? ' in' : '') + (warn ? ' warn' : '') + '">' + tag + '<div class="w"><div class="m">' + md(c.date) + '(' + dowOf(c.date) + ') ' + c.period + '교시 · ' + esc(c.cls) + '</div><div class="s">' + (c.subject ? esc(c.subject) + ' · ' : '') + who + '</div></div>' + ab + '</div>';
+}
+// 학생: 오늘·다음 수업일 바뀐 수업을 맨 위에, 지난번 열어 본 뒤 새로 생긴 건 NEW
+function chKey(c) { return S.cls + '|' + c.date + '|' + c.period + '|' + (c.type || '') + '|' + (c.now || ''); }
+function seenSet() { try { return JSON.parse(ls('tt.seen.' + S.cls) || '[]'); } catch (e) { return []; } }
+function markSeen(list) { try { ls('tt.seen.' + S.cls, JSON.stringify(list.map(chKey).slice(-200))); } catch (e) { } }
+function classTopHtml(d) {
+  var tdy = today(), days = schoolDays(), next = days.filter(function (x) { return x > tdy; })[0];
+  var all = (d.changes || []).filter(function (c) { return c.date >= tdy; });
+  var seen = S._seen || (S._seen = seenSet()), first = !ls('tt.seen.' + S.cls);
+  var T = all.filter(function (c) { return c.date === tdy; }), N = next ? all.filter(function (c) { return c.date === next; }) : [];
+  var newCnt = first ? 0 : all.filter(function (c) { return seen.indexOf(chKey(c)) < 0; }).length;
+  clearTimeout(S._mt); S._mt = setTimeout(function () { markSeen(all); }, 1500);   // 이번에 본 변동은 다음에 열 때 NEW가 아님
+  function line(c) {
+    var isNew = !first && seen.indexOf(chKey(c)) < 0;
+    return '<div class="hl"><span class="p">' + c.period + '교시</span><span class="t">' + (c.was && c.was !== c.now ? esc(c.was) + ' → ' : '') + '<b>' + esc(c.now || '수업 없음') + '</b></span>' +
+      (isNew ? '<span class="new">NEW</span>' : '') + (c.type ? '<span class="tag">' + esc(c.type) + '</span>' : '') + '</div>';
+  }
+  var h = '<div class="card home"><h2>오늘 바뀐 수업' + (T.length ? '<span class="count">' + T.length + '</span>' : '') + (newCnt ? '<span class="new">새 변동 ' + newCnt + '</span>' : '') + '</h2>';
+  h += T.length ? T.map(line).join('') : '<p class="empty">오늘은 시간표 그대로예요.</p>';
+  if (N.length) h += '<div class="sub2">' + md(next) + '(' + dowOf(next) + ') 바뀐 수업</div>' + N.map(line).join('');
+  return h + '</div>';
 }
 function classChange(c) {
   return '<div class="chg in">' + (c.type ? '<span class="tag">' + esc(c.type) + '</span>' : '') + '<div class="w"><div class="m">' + md(c.date) + '(' + dowOf(c.date) + ') ' + c.period + '교시</div><div class="s">' +
@@ -465,7 +509,7 @@ function startClass() {
   S.step = 'class'; S.msg = ''; render();
   api({ api: 'classes' }).then(function (d) { S.classes = d.classes; }).catch(function (e) { S.msg = e.message; }).then(render);
 }
-function pickClass(c) { S.mode = 's'; S.cls = c; ls('tt.mode', 's'); ls('tt.cls', c); setUrlCls(c); S.data = null; S.at = 0; S.step = ''; loadCache(); render(); refresh(true); }
+function pickClass(c) { S._seen = null; S.mode = 's'; S.cls = c; ls('tt.mode', 's'); ls('tt.cls', c); setUrlCls(c); S.data = null; S.at = 0; S.step = ''; loadCache(); render(); refresh(true); }
 function logout() {
   if (!confirm(S.mode === 't' ? '개인 코드를 다시 넣을까요?' : '반을 다시 고를까요?')) return;
   ls('tt.cache.t', null); ls('tt.code', null); ls('tt.mode', null); ls('tt.cls', null);
