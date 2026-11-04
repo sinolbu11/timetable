@@ -46,8 +46,8 @@ button,input{font-family:inherit;color:inherit;font-size:16px}
 .band span.off{background:var(--bad-bg);color:var(--bad-fg)}
 .row{display:flex;align-items:center;gap:12px;min-height:50px;padding:4px 10px;border-radius:12px}
 .row+.row{margin-top:2px}
-.row .p{width:44px;flex:none;font-weight:700;font-size:14px;color:var(--muted);line-height:1.15}
-.row .p small{display:block;font-size:11px;font-weight:400;color:var(--faint)}
+.row .p{width:56px;flex:none;font-weight:700;font-size:14px;color:var(--muted);line-height:1.15}
+.row .p small{display:block;font-size:13px;font-weight:600;color:var(--muted);margin-top:2px}
 .row .t{flex:1;min-width:0;font-size:16px}.row .t small{color:var(--muted);font-size:12.5px;margin-left:6px}
 .row.free .t{color:var(--faint)}
 .row.add{background:var(--chg-bg)}.row.add .t{color:var(--chg-fg);font-weight:700}
@@ -100,6 +100,11 @@ table.g td.drop{background:var(--off-bg);color:var(--faint);text-decoration:line
 .grid-cls .b{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .grid-cls button{min-height:52px;border-radius:14px;border:1px solid var(--line);background:var(--surface);font-weight:700;font-size:16px;cursor:pointer}
 .msg{font-size:14px;color:var(--bad-fg)}
+#daycard .row{border-radius:0;border-bottom:1px solid var(--line-soft);min-height:54px;margin:0}
+#daycard .row+.row{margin-top:0}
+#daycard .row.add,#daycard .row.now,#daycard .row.bad{border-radius:10px;border-bottom-color:transparent}
+.lunch{display:flex;align-items:center;gap:10px;margin:8px 0;color:var(--muted);font-size:13px;font-weight:700}
+.lunch:before,.lunch:after{content:"";flex:1;height:1px;background:var(--line)}
 .card.home{border:1.5px solid var(--accent)}
 .hl{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:12px;background:var(--chg-bg)}.hl+.hl{margin-top:6px}
 .hl .p{width:44px;flex:none;font-weight:700;font-size:14px;color:var(--chg-fg)}.hl .t{flex:1;min-width:0;font-size:15px;color:var(--chg-fg)}
@@ -297,6 +302,10 @@ function render() {
     var bl = (dBells || [])[r.p - 1], cls = 'row ' + r.kind + (cur === r.p ? ' now' : '');
     var tag = r.tag ? '<span class="tag ' + (r.kind === 'drop' ? 'drop' : r.kind === 'bad' ? 'bad' : '') + '">' + esc(r.tag) + '</span>' : (cur === r.p ? '<span class="tag now">지금</span>' : '');
     h += '<div class="' + cls + '"><span class="p">' + r.p + '교시' + (bl ? '<small>' + bl.s + '</small>' : '') + '</span><span class="t">' + r.text + '</span>' + tag + '</div>';
+    if (r.p === 4 && rows.length > 4) {
+      var b4 = (dBells || [])[3], b5 = (dBells || [])[4];
+      h += '<div class="lunch">점심시간' + (b4 && b5 ? ' · ' + b4.e + '~' + b5.s : '') + '</div>';
+    }
   });
   h += '</div>';
 
