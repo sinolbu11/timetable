@@ -62,6 +62,9 @@ button,input{font-family:inherit;color:inherit;font-size:16px}
 .chg.in{background:var(--chg-bg);border:1.5px solid var(--accent)}.chg.warn{border-color:var(--bad-fg)}
 .chg .w{flex:1;min-width:0}.chg .m{font-weight:700;font-size:15px}.chg .s{font-size:13px;color:var(--muted)}
 .chg.in .s{color:var(--chg-fg)}
+.chg .k{font-size:12.5px;font-weight:700;margin-bottom:3px;color:var(--chg-fg)}.chg.mv .k{color:var(--accent)}.chg.out .k{color:var(--muted)}
+.chg .mvl{font-size:16px;font-weight:800}.chg .mvl s{color:var(--muted);font-weight:500;font-size:14px}.chg .mvl .ar{color:var(--accent);margin:0 6px}
+.chg.out .mvl s{font-size:15px;font-weight:700}.chg .mvl s,.chg .mvl b{white-space:nowrap}.chg .ab{margin-top:8px}
 .ack{flex:none;border:1.5px solid var(--accent);background:var(--surface);color:var(--chg-fg);font-weight:700;border-radius:10px;padding:8px 10px;font-size:13px;cursor:pointer}
 .ack:disabled{opacity:.6}.acked{flex:none;font-size:12px;font-weight:700;color:var(--ok-fg)}
 .empty{color:var(--muted);font-size:14px;margin:4px 2px}
@@ -310,10 +313,12 @@ function render() {
   h += '</div>';
 
   // 바뀐 수업 (오늘부터)
-  var ch = (d.changes || []).filter(function (c) { return c.date >= tdy; }).sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : a.period - b.period; });
+  var useMine = S.mode === 't' && d.mine;
+  var ch = useMine ? d.mine.filter(function (x) { return x.date >= tdy || (x.oldDate && x.oldDate >= tdy); })
+    : (d.changes || []).filter(function (c) { return c.date >= tdy; }).sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : a.period - b.period; });
   h += '<div class="card"><h2>바뀐 수업' + (ch.length ? '<span class="count">' + ch.length + '</span>' : '') + '</h2>';
   if (!ch.length) h += '<p class="empty">앞으로 2주 동안 바뀐 수업이 없어요.</p>';
-  ch.forEach(function (c) { h += S.mode === 't' ? teacherChange(c, d) : classChange(c); });
+  ch.forEach(function (c) { h += useMine ? mineCard(c) : S.mode === 't' ? teacherChange(c, d) : classChange(c); });
   h += '</div>';
 
   h += mealHtml(d);
@@ -407,6 +412,17 @@ function homeHtml(d) {
   return h + '</div>';
 }
 
+// 선생님 기준으로 묶은 변동: 내 수업이 옮겨져요 / 보강 들어가요 / 수업이 빠져요
+function mineCard(x) {
+  var ic = x.kind === 'move' ? '📦 ' : x.kind === 'in' ? '🙋 ' : '➖ ';
+  var l = x.kind === 'move' ? '<s>' + esc(x.old) + '</s><span class="ar">→</span><b>' + esc(x.now) + '</b>' : x.kind === 'in' ? '<b>' + esc(x.now) + '</b>' : '<s>' + esc(x.old) + '</s>';
+  var ab = '';
+  if (x.warn) ab = '<span class="tag bad">확인 중</span>';
+  else if (x.needAck && x.acked === false) ab = '<button class="ack" onclick="ack(' + x.row + ',this)">확인했어요</button>';
+  else if (x.needAck && x.acked) ab = '<span class="acked">✓ 확인함</span>';
+  return '<div class="chg ' + (x.kind === 'move' ? 'mv in' : x.kind === 'in' ? 'in' : 'out') + (x.warn ? ' warn' : '') + '"><div class="w"><div class="k">' + ic + esc(x.title) +
+    '</div><div class="mvl">' + l + '</div><div class="s">' + esc(x.note || '') + '</div>' + (ab ? '<div class="ab">' + ab + '</div>' : '') + '</div></div>';
+}
 function teacherChange(c, d) {
   var inn = c.to === d.name, warn = /^⚠/.test(c.status || '');
   var who = inn ? (c.from ? esc(c.from) + ' 선생님 수업에 들어가요' : '새로 들어가요') : (c.to ? esc(c.to) + ' 선생님이 들어가요' : '수업이 빠져요');
@@ -559,6 +575,7 @@ function ack(row, btn) {
   btn.disabled = true; btn.textContent = '보내는 중…';
   api({ code: S.code, ack: row }).then(function () {
     (S.data.changes || []).forEach(function (c) { if (c.row === row && c.to === S.data.name) c.acked = true; });
+    (S.data.mine || []).forEach(function (x) { if (x.row === row && x.needAck) x.acked = true; });
     saveCache(); render();
   }).catch(function (e) { btn.disabled = false; btn.textContent = '확인했어요'; alert('보내지 못했어요: ' + e.message); });
 }
