@@ -1,11 +1,11 @@
-﻿# 내 시간표 (트레이 앱) v1.7
+﻿# 내 시간표 (트레이 앱) v1.7.1
 param([string]$Launcher = '')   # 내 시간표.exe 로 실행하면 exe 위치가 들어와요 (자동 실행 등록용)
 # ─────────────────────────────────────────────────────────────
 # [수업계 선생님] 나눠 주기 전에 아래 줄에 PC 앱용 배포 주소를 넣어 두면,
 # 선생님들은 처음 실행할 때 메일로 받은 개인 코드만 넣으면 돼요.
 $PresetDataUrl = 'https://script.google.com/a/macros/simin.hs.kr/s/AKfycbwfjmnh56py7G_Bs-1wSv_Bf6CPQLYwP5QMcRwXevhIvBkv8YDeuYQbCztsrGoAI2MV/exec'
 # 자동 업데이트: 아래 주소의 version.txt 가 더 높으면 timetable_tray.ps1 을 내려받아 바꿔요. (설정에서 끌 수 있음)
-$AppVersion = '1.7'
+$AppVersion = '1.7.1'
 $UpdateBase = 'https://sinolbu11.github.io/timetable/pc/'
 $ScriptPath = $PSCommandPath
 # ─────────────────────────────────────────────────────────────
@@ -831,7 +831,7 @@ function Show-Settings {
   try {
     $script:dlg_d = New-Object System.Windows.Forms.Form
     $script:dlg_d.Text = '내 시간표 설정'; $script:dlg_d.Font = $FontBase
-    $script:dlg_d.ClientSize = New-Object System.Drawing.Size(460, 500)
+    $script:dlg_d.ClientSize = New-Object System.Drawing.Size(460, 548)
     $script:dlg_d.StartPosition = 'CenterScreen'; $script:dlg_d.FormBorderStyle = 'FixedDialog'; $script:dlg_d.MaximizeBox = $false; $script:dlg_d.MinimizeBox = $false; $script:dlg_d.TopMost = $true
     [void](New-Lbl $script:dlg_d '개인 코드 (학교 메일로 받은 8자리)' 16 14)
     $script:dlg_tCode = New-Box $script:dlg_d 16 36 300 $script:Code $true
@@ -859,12 +859,12 @@ function Show-Settings {
     $script:dlg_evt.SelectedItem = [string]$script:Cfg.EveTime; if ($null -eq $script:dlg_evt.SelectedItem) { $script:dlg_evt.SelectedIndex = 3 }
     $script:dlg_d.Controls.Add($script:dlg_evt)
     $hint2 = New-Lbl $script:dlg_d '새 변동 알림 창과 확인 안 한 변동 재알림(수업 1시간 전·다음 날 아침)은 항상 켜져 있어요.' 16 364; $hint2.ForeColor = $ColMuted; $hint2.MaximumSize = New-Object System.Drawing.Size(428, 0)
-    $script:dlg_upd = New-Object System.Windows.Forms.CheckBox; $script:dlg_upd.Text = ('새 버전이 나오면 자동으로 업데이트 (지금 v' + $AppVersion + ')'); $script:dlg_upd.Location = New-Object System.Drawing.Point(16, 396); $script:dlg_upd.AutoSize = $true
+    $script:dlg_upd = New-Object System.Windows.Forms.CheckBox; $script:dlg_upd.Text = ('새 버전이 나오면 자동으로 업데이트 (지금 v' + $AppVersion + ')'); $script:dlg_upd.Location = New-Object System.Drawing.Point(16, 410); $script:dlg_upd.AutoSize = $true
     $script:dlg_upd.Checked = [bool]$script:Cfg.AutoUpdate; $script:dlg_d.Controls.Add($script:dlg_upd)
-    $hint = New-Lbl $script:dlg_d '개인 코드는 이 PC의 내 Windows 계정으로 암호화해서 저장해요. 다른 분께 알려 주지 마세요.' 16 424; $hint.ForeColor = $ColMuted; $hint.MaximumSize = New-Object System.Drawing.Size(428, 0)
-    $script:dlg_lErr = New-Lbl $script:dlg_d '' 16 456; $script:dlg_lErr.ForeColor = $ColBadFg; $script:dlg_lErr.MaximumSize = New-Object System.Drawing.Size(428, 0)
-    $ok = New-Object System.Windows.Forms.Button; $ok.Text = '저장'; $ok.Location = New-Object System.Drawing.Point(262, 460); $ok.Size = New-Object System.Drawing.Size(88, 32); $script:dlg_d.Controls.Add($ok)
-    $cancel = New-Object System.Windows.Forms.Button; $cancel.Text = '취소'; $cancel.Location = New-Object System.Drawing.Point(356, 460); $cancel.Size = New-Object System.Drawing.Size(88, 32); $cancel.DialogResult = 'Cancel'; $script:dlg_d.Controls.Add($cancel)
+    $hint = New-Lbl $script:dlg_d '개인 코드는 이 PC의 내 Windows 계정으로 암호화해서 저장해요. 다른 분께 알려 주지 마세요.' 16 444; $hint.ForeColor = $ColMuted; $hint.MaximumSize = New-Object System.Drawing.Size(428, 0)
+    $script:dlg_lErr = New-Lbl $script:dlg_d '' 16 484; $script:dlg_lErr.ForeColor = $ColBadFg; $script:dlg_lErr.MaximumSize = New-Object System.Drawing.Size(428, 0)
+    $ok = New-Object System.Windows.Forms.Button; $ok.Text = '저장'; $ok.Location = New-Object System.Drawing.Point(262, 506); $ok.Size = New-Object System.Drawing.Size(88, 32); $script:dlg_d.Controls.Add($ok)
+    $cancel = New-Object System.Windows.Forms.Button; $cancel.Text = '취소'; $cancel.Location = New-Object System.Drawing.Point(356, 506); $cancel.Size = New-Object System.Drawing.Size(88, 32); $cancel.DialogResult = 'Cancel'; $script:dlg_d.Controls.Add($cancel)
     $script:dlg_d.CancelButton = $cancel
     $script:dlg_who = ''
 
