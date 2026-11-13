@@ -17,15 +17,44 @@
 :root{--bg:#F6F6F3;--surface:#FFFFFF;--line:#E2E2DD;--line-soft:#EDEDE8;--fg:#1A1C1E;--muted:#5F6368;--faint:#8A8F94;
 --accent:#E8590C;--chg-bg:#FFF1E7;--chg-fg:#9A3412;--info-bg:#E3EBFF;--info-fg:#1E3A8A;--info-line:#3B6FD8;
 --off-bg:#F1F1EC;--off-line:#A3A3A0;--bad-bg:#FBE4E6;--bad-fg:#9F1239;--ok-bg:#E6F4EA;--ok-fg:#14532D;--today:#EEF3FF}
-@media (prefers-color-scheme: dark){:root{--bg:#121314;--surface:#1C1E20;--line:#2E3134;--line-soft:#26292C;--fg:#ECEDEE;--muted:#A2A7AC;--faint:#80858A;
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#121314;--surface:#1C1E20;--line:#2E3134;--line-soft:#26292C;--fg:#ECEDEE;--muted:#A2A7AC;--faint:#80858A;
 --accent:#FF7A33;--chg-bg:#33200F;--chg-fg:#FFB48A;--info-bg:#1E2A44;--info-fg:#A9C1FF;--info-line:#6E93E8;--off-bg:#232527;--off-line:#5C6064;
 --bad-bg:#3A1620;--bad-fg:#FDA4AF;--ok-bg:#163322;--ok-fg:#A7E3BC;--today:#1A2233;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#121314;--surface:#1C1E20;--line:#2E3134;--line-soft:#26292C;--fg:#ECEDEE;--muted:#A2A7AC;--faint:#80858A;
+--accent:#FF7A33;--chg-bg:#33200F;--chg-fg:#FFB48A;--info-bg:#1E2A44;--info-fg:#A9C1FF;--info-line:#6E93E8;--off-bg:#232527;--off-line:#5C6064;
+--bad-bg:#3A1620;--bad-fg:#FDA4AF;--ok-bg:#163322;--ok-fg:#A7E3BC;--today:#1A2233;color-scheme:dark}
+/* 강조색 */
+:root[data-accent="blue"]{--accent:#2563EB;--chg-bg:#E6EEFF;--chg-fg:#1E3A8A}
+:root[data-accent="green"]{--accent:#15803D;--chg-bg:#E4F5E9;--chg-fg:#14532D}
+:root[data-accent="purple"]{--accent:#7C3AED;--chg-bg:#F0E8FF;--chg-fg:#4C1D95}
+:root[data-accent="pink"]{--accent:#DB2777;--chg-bg:#FDE7F1;--chg-fg:#831843}
+:root[data-accent="teal"]{--accent:#0D9488;--chg-bg:#E0F5F2;--chg-fg:#134E4A}
+:root[data-accent="blue"].dk{--accent:#60A5FA;--chg-bg:#172554;--chg-fg:#BFDBFE}
+:root[data-accent="green"].dk{--accent:#4ADE80;--chg-bg:#0F2E1C;--chg-fg:#BBF7D0}
+:root[data-accent="purple"].dk{--accent:#A78BFA;--chg-bg:#2A1A4E;--chg-fg:#DDD6FE}
+:root[data-accent="pink"].dk{--accent:#F472B6;--chg-bg:#4A1130;--chg-fg:#FBCFE8}
+:root[data-accent="teal"].dk{--accent:#2DD4BF;--chg-bg:#0F3330;--chg-fg:#99F6E4}
+/* 배경 (단색·무늬·사진) */
+body.has-bg{background:var(--bgimg) center/cover fixed no-repeat}
+body.has-bg::before{content:"";position:fixed;inset:0;background:var(--bg);opacity:var(--bgdim,.55);pointer-events:none;z-index:0}
+body.has-bg #app{position:relative;z-index:1}
+body.has-bg .card,body.has-bg .chg,body.has-bg .err{box-shadow:0 1px 6px rgba(0,0,0,.08)}
+/* 보기 설정 */
+.ui .row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--line-soft);flex-wrap:wrap}
+.ui .row:last-child{border-bottom:0}.ui .row>span:first-child{font-weight:700;font-size:14px;min-width:70px}
+.ui select{font-family:inherit;font-size:15px;padding:7px 10px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);color:var(--fg);max-width:200px}
+.ui .sw{display:flex;gap:6px;flex-wrap:wrap}.ui .sw button{width:30px;height:30px;border-radius:50%;border:2px solid transparent;cursor:pointer;padding:0}
+.ui .sw button.on{border-color:var(--fg);box-shadow:0 0 0 2px var(--surface) inset}
+.ui input[type=range]{width:150px;accent-color:var(--accent)}
+.ui .fontpv{font-size:15px;color:var(--muted);width:100%;padding:4px 0 0}
+.ui .small{font-size:12px;color:var(--muted)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--bg);color:var(--fg)}
-body{font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",system-ui,sans-serif;font-size:16px;line-height:1.5;
+body{font-family:var(--font,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",system-ui,sans-serif);font-size:16px;line-height:1.5;
  padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
 button,input{font-family:inherit;color:inherit;font-size:16px}
-.wrap{max-width:520px;margin:0 auto;padding:14px 16px 40px}
+.wrap{max-width:520px;margin:0 auto;padding:14px 16px 40px;zoom:var(--zoom,1)}
+:root[data-bold="1"] .cell .sj,:root[data-bold="1"] table.g td,:root[data-bold="1"] .chg .w,:root[data-bold="1"] .nn{font-weight:800}
 .top{display:flex;align-items:center;gap:10px;margin:4px 0 12px}
 .top h1{margin:0;font-size:22px;letter-spacing:-.02em;line-height:1.2}
 .top .sub{font-size:12.5px;color:var(--muted)}
@@ -270,7 +299,7 @@ function render() {
        '<button class="icon-btn' + (S.busy ? ' spin' : '') + '" onclick="refresh(true)" aria-label="새로고침">' + ICON_REFRESH + '</button></div>';
   if (S.err) h += '<div class="err">' + esc(S.err) + (d ? '<br><small>저장해 둔 시간표를 보여 드려요.</small>' : '') + '</div>';
   if (installHint()) h += installHint();
-  if (!d) { h += '<div class="card"><p class="empty">' + (S.busy ? '시간표를 받아 오는 중이에요…' : '시간표가 아직 없어요. 오른쪽 위 새로고침을 눌러 주세요.') + '</p></div>'; app.innerHTML = h + footHtml(); return; }
+  if (!d) { h += '<div class="card"><p class="empty">' + (S.busy ? '시간표를 받아 오는 중이에요…' : '시간표가 아직 없어요. 오른쪽 위 새로고침을 눌러 주세요.') + '</p></div>'; app.innerHTML = h + uiHtml() + footHtml(); return; }
 
   if (S.mode === 't' && d.admin) {
     var mineAny = (d.days || []).some(function (x) { return x.slots && x.slots[d.name] && Object.keys(x.slots[d.name]).length; });
@@ -279,7 +308,7 @@ function render() {
       if (!S.view) S.view = ls('tt.view') || 'me';
       h += '<div class="seg"><button class="' + (S.view === 'me' ? 'on' : '') + '" onclick="setView(\'me\')">내 시간표</button><button class="' + (S.view === 'school' ? 'on' : '') + '" onclick="setView(\'school\')">학교 전체</button></div>';
     }
-    if (S.view === 'school') { h += schoolHtml(d); app.innerHTML = h + footHtml(); swipe(); return; }
+    if (S.view === 'school') { h += schoolHtml(d); app.innerHTML = h + uiHtml() + footHtml(); swipe(); return; }
   }
   var tdy = today(), days = schoolDays();
   if (!S.dsel || days.indexOf(S.dsel) < 0) S.dsel = days.indexOf(tdy) >= 0 ? tdy : (days.filter(function (x) { return x >= tdy; })[0] || days[0]);
@@ -323,7 +352,7 @@ function render() {
 
   h += mealHtml(d);
   h += weekHtml(d);
-  app.innerHTML = h + footHtml();
+  app.innerHTML = h + uiHtml() + footHtml();
   swipe();
 }
 function setView(v) { S.view = v; ls('tt.view', v); render(); }
@@ -500,8 +529,91 @@ function weekHtml(d) {
   return h + '</table></div></details>';
 }
 function footHtml() {
-  return '<div class="foot"><span>' + (S.mode === 't' ? '선생님 모드' : '학생 모드') + '</span><button class="link" onclick="logout()">' + (S.mode === 't' ? '개인 코드 바꾸기' : '반 바꾸기') + '</button></div>';
+  return '<div class="foot"><span>' + (S.mode === 't' ? '선생님 모드' : '학생 모드') + '</span><span><button class="link" onclick="toggleUi()">보기 설정</button> · <button class="link" onclick="logout()">' + (S.mode === 't' ? '개인 코드 바꾸기' : '반 바꾸기') + '</button></span></div>';
 }
+
+// ---------- 보기 설정 (글자·글꼴·색·배경, 이 폰에만 저장) ----------
+var FONTS = [
+  ['', '기본 (폰 글꼴)', ''],
+  ['Pretendard', '프리텐다드', 'https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css'],
+  ['Noto Sans KR', '노토 산스', 'https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;800&display=swap'],
+  ['Nanum Gothic', '나눔고딕', 'https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&display=swap'],
+  ['Gowun Dodum', '고운돋움', 'https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap'],
+  ['IBM Plex Sans KR', 'IBM 플렉스', 'https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;700&display=swap'],
+  ['Nanum Myeongjo', '나눔명조', 'https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&display=swap'],
+  ['Gowun Batang', '고운바탕', 'https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&display=swap'],
+  ['Hahmlet', '함렛', 'https://fonts.googleapis.com/css2?family=Hahmlet:wght@400;700&display=swap'],
+  ['Black Han Sans', '검은고딕 (굵게)', 'https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap'],
+  ['Do Hyeon', '도현 (굵게)', 'https://fonts.googleapis.com/css2?family=Do+Hyeon&display=swap'],
+  ['Jua', '주아 (둥글게)', 'https://fonts.googleapis.com/css2?family=Jua&display=swap'],
+  ['Nanum Pen Script', '나눔손글씨 펜', 'https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&display=swap'],
+  ['Gaegu', '개구쟁이 (손글씨)', 'https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&display=swap']
+];
+var ACCENTS = [['', '#E8590C', '주황'], ['blue', '#2563EB', '파랑'], ['green', '#15803D', '초록'], ['teal', '#0D9488', '청록'], ['purple', '#7C3AED', '보라'], ['pink', '#DB2777', '분홍']];
+var BGS = [['', '', '없음'], ['sky', 'linear-gradient(160deg,#dbeafe,#f0f9ff 60%,#ede9fe)', '하늘'], ['mint', 'linear-gradient(160deg,#d1fae5,#ecfeff 60%,#fef3c7)', '민트'],
+  ['sunset', 'linear-gradient(160deg,#fde68a,#fecaca 55%,#e9d5ff)', '노을'], ['night', 'linear-gradient(160deg,#0f172a,#1e293b 60%,#312e81)', '밤하늘'],
+  ['dots', 'radial-gradient(#9ca3af 1px,transparent 1px) 0 0/18px 18px', '점무늬'], ['photo', '', '내 사진']];
+var UI = { zoom: 1, font: '', bold: 0, theme: '', accent: '', bg: '', dim: 0.55 };
+try { var u0 = JSON.parse(ls('tt.ui') || '{}'); for (var k0 in u0) UI[k0] = u0[k0]; } catch (e) { }
+function saveUi() { ls('tt.ui', JSON.stringify(UI)); }
+function applyUi() {
+  var r = document.documentElement, b = document.body;
+  r.style.setProperty('--zoom', UI.zoom || 1);
+  if (UI.theme) r.setAttribute('data-theme', UI.theme); else r.removeAttribute('data-theme');
+  var dark = UI.theme === 'dark' || (!UI.theme && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  r.classList.toggle('dk', dark);
+  if (UI.accent) r.setAttribute('data-accent', UI.accent); else r.removeAttribute('data-accent');
+  if (UI.bold) r.setAttribute('data-bold', '1'); else r.removeAttribute('data-bold');
+  // 글꼴
+  var f = null; FONTS.forEach(function (x) { if (x[0] === UI.font) f = x; });
+  if (f && f[0]) {
+    if (f[2] && !document.getElementById('font-' + f[0].replace(/\s/g, ''))) { var l = document.createElement('link'); l.id = 'font-' + f[0].replace(/\s/g, ''); l.rel = 'stylesheet'; l.href = f[2]; document.head.appendChild(l); }
+    r.style.setProperty('--font', '"' + f[0] + '", -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif');
+  } else r.style.removeProperty('--font');
+  // 배경
+  var bg = null; BGS.forEach(function (x) { if (x[0] === UI.bg) bg = x; });
+  var img = bg ? (bg[0] === 'photo' ? (ls('tt.bgphoto') ? 'url(' + ls('tt.bgphoto') + ')' : '') : bg[1]) : '';
+  if (img) { b.classList.add('has-bg'); r.style.setProperty('--bgimg', img); r.style.setProperty('--bgdim', UI.dim); }
+  else { b.classList.remove('has-bg'); r.style.removeProperty('--bgimg'); }
+}
+if (window.matchMedia) try { window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyUi); } catch (e) { }
+function toggleUi() { S.ui = !S.ui; render(); if (S.ui) setTimeout(function () { var el = document.getElementById('uibox'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 50); }
+function setUi(k, v) { UI[k] = v; saveUi(); applyUi(); if (k !== 'zoom' && k !== 'dim') render(); }
+function uiHtml() {
+  if (!S.ui) return '';
+  var h = '<div class="card ui" id="uibox"><h2>보기 설정<button class="link" onclick="toggleUi()">닫기</button></h2>';
+  h += '<div class="row"><span>글자 크기</span><span class="sw" style="align-items:center"><span class="small">작게</span><input type="range" min="0.85" max="1.4" step="0.05" value="' + (UI.zoom || 1) + '" oninput="setUi(\'zoom\',+this.value)"><span class="small">크게</span></span></div>';
+  h += '<div class="row"><span>글꼴</span><select onchange="setUi(\'font\',this.value)">' + FONTS.map(function (f) { return '<option value="' + f[0] + '"' + (f[0] === UI.font ? ' selected' : '') + '>' + f[1] + '</option>'; }).join('') + '</select>' +
+       '<div class="fontpv">오늘 3교시 3-2 심화 영어Ⅱ · 11/13(금) 바뀐 수업 2건</div></div>';
+  h += '<div class="row"><span>과목 굵게</span><label><input type="checkbox"' + (UI.bold ? ' checked' : '') + ' onchange="setUi(\'bold\',this.checked?1:0)"> 시간표 글자를 더 굵게</label></div>';
+  h += '<div class="row"><span>밝기</span><div class="seg">' + [['', '자동'], ['light', '밝게'], ['dark', '어둡게']].map(function (t) { return '<button class="' + (t[0] === (UI.theme || '') ? 'on' : '') + '" onclick="setUi(\'theme\',\'' + t[0] + '\')">' + t[1] + '</button>'; }).join('') + '</div></div>';
+  h += '<div class="row"><span>강조색</span><span class="sw">' + ACCENTS.map(function (a) { return '<button class="' + (a[0] === (UI.accent || '') ? 'on' : '') + '" style="background:' + a[1] + '" title="' + a[2] + '" aria-label="' + a[2] + '" onclick="setUi(\'accent\',\'' + a[0] + '\')"></button>'; }).join('') + '</span></div>';
+  h += '<div class="row"><span>배경</span><select onchange="pickBg(this.value)">' + BGS.map(function (b) { return '<option value="' + b[0] + '"' + (b[0] === (UI.bg || '') ? ' selected' : '') + '>' + b[2] + '</option>'; }).join('') + '</select>' +
+       '<input type="file" id="bgfile" accept="image/*" style="display:none" onchange="loadBgPhoto(this)">' +
+       (UI.bg === 'photo' ? '<button class="btn" onclick="document.getElementById(\'bgfile\').click()">사진 고르기</button>' : '') +
+       (UI.bg ? '<span class="sw" style="align-items:center;width:100%"><span class="small">배경 덮기</span><input type="range" min="0" max="0.9" step="0.05" value="' + UI.dim + '" oninput="setUi(\'dim\',+this.value)"><span class="small">진하게</span></span>' : '') +
+       '<div class="small" style="width:100%">사진은 이 폰에만 저장되고 서버로 가지 않아요.</div></div>';
+  h += '<div class="row"><span></span><button class="link" onclick="resetUi()">모두 기본값으로</button></div>';
+  return h + '</div>';
+}
+function pickBg(v) { UI.bg = v; saveUi(); applyUi(); render(); if (v === 'photo' && !ls('tt.bgphoto')) setTimeout(function () { var f = document.getElementById('bgfile'); if (f) f.click(); }, 100); }
+function loadBgPhoto(inp) {
+  var file = inp.files && inp.files[0]; if (!file) return;
+  var rd = new FileReader();
+  rd.onload = function () {
+    var im = new Image();
+    im.onload = function () {
+      var max = 1280, w = im.width, h = im.height, k = Math.min(1, max / Math.max(w, h));
+      var c = document.createElement('canvas'); c.width = Math.round(w * k); c.height = Math.round(h * k);
+      c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+      try { ls('tt.bgphoto', c.toDataURL('image/jpeg', 0.82)); } catch (e) { alert('사진이 너무 커서 저장하지 못했어요. 다른 사진을 골라 주세요.'); return; }
+      UI.bg = 'photo'; saveUi(); applyUi(); render();
+    };
+    im.src = rd.result;
+  };
+  rd.readAsDataURL(file);
+}
+function resetUi() { UI = { zoom: 1, font: '', bold: 0, theme: '', accent: '', bg: '', dim: 0.55 }; saveUi(); ls('tt.bgphoto', null); applyUi(); render(); }
 
 // ---------- 설치 안내 ----------
 var deferredPrompt = null;
@@ -593,6 +705,7 @@ S.mode = ls('tt.mode') || ''; S.code = ls('tt.code') || ''; S.cls = ls('tt.cls')
   } else if (qm === 't' && !S.mode) { S.step = 'code'; }
   if (S.mode === 's' && S.cls && !qc) setUrlCls(S.cls);
 })();
+applyUi();
 if (S.mode === 't' && !S.code) { S.mode = ''; }
 if (S.mode === 's' && !S.cls) S.mode = '';
 if (S.mode) { loadCache(); render(); refresh(false); } else render();
