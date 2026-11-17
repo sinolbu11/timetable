@@ -158,7 +158,7 @@ table.sg td{height:40px;border:1px solid var(--line-soft);border-radius:6px;text
 .seg.mini{width:150px;margin:0 0 8px auto}.seg.mini button{padding:5px 0;font-size:13px}
 table.g td .ws{display:block;font-weight:600}table.g td .wn{display:block;font-size:10px;color:var(--muted);font-weight:400}table.g td.add .wn{color:var(--chg-fg)}
 table.sg td.cn{border:0;background:none;font-weight:800;font-size:15px;color:var(--fg);cursor:pointer}table.sg td.cn small{font-size:9px;font-weight:400;color:var(--muted)}
-table.sg td.cn.on{color:var(--accent)}
+table.sg td.cn.on{color:var(--accent)}table.sg td.cn .rm{display:block;font-size:9.5px;line-height:1.15;white-space:nowrap;font-weight:700;color:var(--fg);padding:0}table.sg:has(td.cn .rm) th:first-child{width:36px}
 table.sg td.e{border-style:dashed;background:none}table.sg td.m{color:var(--faint);border-style:dashed;background:none}
 table.sg td.c{background:var(--chg-bg);border:1.5px solid var(--accent);color:var(--chg-fg);font-weight:700;cursor:pointer}
 table.sg td.x{background:var(--off-bg);color:var(--faint);text-decoration:line-through;cursor:pointer}
@@ -363,7 +363,7 @@ function schoolHtml(d) {
   if (!g) return h + '<div class="card"><p class="empty">' + (S.busy ? '학교 전체 시간표를 받아 오는 중이에요…' : '학교 전체 시간표가 아직 없어요. 오른쪽 위 새로고침을 눌러 주세요.') + '</p></div>';
   var tdy = today(), days = sgDays();
   if (!S.sday || days.indexOf(S.sday) < 0) S.sday = days.indexOf(tdy) >= 0 ? tdy : (days.filter(function (x) { return x >= tdy; })[0] || days[0]);
-  var grades = []; g.classes.forEach(function (c) { var x = c.split('-')[0]; if (grades.indexOf(x) < 0) grades.push(x); });
+  var grades = []; g.classes.forEach(function (c) { var x = gradeOf(c); if (grades.indexOf(x) < 0) grades.push(x); });
   if (!S.grade || grades.indexOf(S.grade) < 0) S.grade = ls('tt.grade') && grades.indexOf(ls('tt.grade')) >= 0 ? ls('tt.grade') : grades[0];
   var di = days.indexOf(S.sday), day = g.days[di], isT = S.sday === tdy;
   var cnt = 0; g.classes.forEach(function (c) { (day.rows[c] || []).forEach(function (x) { if (x && (x[1] === 'c' || x[1] === 'x')) cnt++; }); });
@@ -374,8 +374,8 @@ function schoolHtml(d) {
   var sc = (d.sched || {})[S.sday];
   if (sc && sc.length) h += '<div class="band">' + sc.map(function (x) { return '<span class="' + (x.off ? 'off' : '') + '">' + esc(x.n) + '</span>'; }).join('') + '</div>';
   h += '<div class="seg small">' + grades.map(function (x) {
-    var n = 0; g.classes.forEach(function (c) { if (c.split('-')[0] === x) (day.rows[c] || []).forEach(function (y) { if (y && (y[1] === 'c' || y[1] === 'x')) n++; }); });
-    return '<button class="' + (x === S.grade ? 'on' : '') + '" onclick="setGrade(\'' + x + '\')">' + x + '학년' + (n ? ' <b class="dot">' + n + '</b>' : '') + '</button>';
+    var n = 0; g.classes.forEach(function (c) { if (gradeOf(c) === x) (day.rows[c] || []).forEach(function (y) { if (y && (y[1] === 'c' || y[1] === 'x')) n++; }); });
+    return '<button class="' + (x === S.grade ? 'on' : '') + '" onclick="setGrade(\'' + x + '\')">' + (x === '기타' ? '특별실' : x + '학년') + (n ? ' <b class="dot">' + n + '</b>' : '') + '</button>';
   }).join('') + '</div>';
   var cur = null, m = nowMin(); if (isT) (d.bells || []).forEach(function (b) { if (m >= hm(b.s) && m < hm(b.e)) cur = b.p; });
   var showT = S.sgShow === 't';
@@ -384,9 +384,9 @@ function schoolHtml(d) {
   for (var p = 1; p <= g.periods; p++) h += '<th' + (cur === p ? ' class="now"' : '') + '>' + p + '</th>';
   h += '</tr>';
   g.classes.forEach(function (c) {
-    if (c.split('-')[0] !== S.grade) return;
+    if (gradeOf(c) !== S.grade) return;
     var r = day.rows[c] || [];
-    h += '<tr><td class="cn' + (S.openCls === c ? ' on' : '') + '" onclick="openCls(\'' + c + '\')">' + esc(c.split('-')[1]) + '<small>반</small></td>';
+    h += '<tr><td class="cn' + (S.openCls === c ? ' on' : '') + '" onclick="openCls(\'' + c + '\')">' + (/^\d+-\d+$/.test(c) ? esc(c.split('-')[1]) + '<small>반</small>' : '<small class="rm">' + roomShort(c) + '</small>') + '</td>';
     for (var p = 1; p <= g.periods; p++) {
       var x = r[p - 1], k = !x ? 'e' : x[1] === 'n' ? '' : x[1], sel = S.cell && S.cell.c === c && S.cell.p === p;
       var click = x && x[1] !== 'm' ? ' onclick="cellInfo(\'' + c + '\',' + p + ')"' : '';
@@ -422,7 +422,11 @@ function classWeekHtml(c, d) {
 }
 function setShow(v) { S.sgShow = v; ls('tt.sgshow2', v); render(); }
 function smove(n) { var days = sgDays(), i = days.indexOf(S.sday) + n; if (i >= 0 && i < days.length) { S.sday = days[i]; S.cell = null; render(); } }
-function setGrade(x) { S.grade = x; ls('tt.grade', x); S.cell = null; S.openCls = (S.openCls && S.openCls.split('-')[0] === x) ? S.openCls : null; render(); }
+// 긴 특별실 이름은 두 줄로: '3학년 모둠학습실2' → '모둠학' + '습실2', '창의2실(A-1)' → '창의2실' + '(A-1)'
+function roomLines(c) { var t = String(c).replace(/^\d학년\s*/, '').replace(/\s+/g, ''); if (t.length <= 4) return [t]; var i = t.indexOf('('); if (i > 0) return [t.slice(0, i), t.slice(i)]; var h = Math.ceil(t.length / 2); return [t.slice(0, h), t.slice(h)]; }
+function roomShort(c) { return roomLines(c).map(esc).join('<br>'); }
+function gradeOf(c) { var m = String(c).match(/^(\d)(?:-|학년)/); return m ? m[1] : '기타'; }
+function setGrade(x) { S.grade = x; ls('tt.grade', x); S.cell = null; S.openCls = (S.openCls && gradeOf(S.openCls) === x) ? S.openCls : null; render(); }
 function cellInfo(c, p) { S.cell = (S.cell && S.cell.c === c && S.cell.p === p) ? null : { c: c, p: p }; render(); }
 function openCls(c) { S.openCls = S.openCls === c ? null : c; render(); if (S.openCls) { var el = document.getElementById('clsweek'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); } }
 
